@@ -751,12 +751,7 @@ public class HttpAsyncClientBuilder {
         String userAgentCopy = this.userAgent;
         if (userAgentCopy == null) {
             if (systemProperties) {
-                userAgentCopy = AccessController.doPrivileged(new PrivilegedAction<String>() {
-                    @Override
-                    public String run() {
-                        return System.getProperty("http.agent");
-                    }
-                });
+                userAgentCopy = getProperty("http.agent", null);
             }
             if (userAgentCopy == null) {
                 userAgentCopy = VersionInfo.getSoftwareInfo("Apache-HttpAsyncClient",
@@ -887,12 +882,7 @@ public class HttpAsyncClientBuilder {
         ConnectionReuseStrategy reuseStrategyCopy = this.reuseStrategy;
         if (reuseStrategyCopy == null) {
             if (systemProperties) {
-                final String s = AccessController.doPrivileged(new PrivilegedAction<String>() {
-                    @Override
-                    public String run() {
-                        return System.getProperty("http.keepAlive", "true");
-                    }
-                });
+                final String s = getProperty("http.keepAlive", "true");
                 if ("true".equalsIgnoreCase(s)) {
                     reuseStrategyCopy = DefaultConnectionReuseStrategy.INSTANCE;
                 } else {
@@ -1014,6 +1004,15 @@ public class HttpAsyncClientBuilder {
                 credentialsProviderCopy,
                 defaultRequestConfig,
                 closeablesCopy);
+    }
+
+    private String getProperty(final String key, final String defaultValue) {
+        return AccessController.doPrivileged(new PrivilegedAction<String>() {
+            @Override
+            public String run() {
+                return System.getProperty(key, defaultValue);
+            }
+        });
     }
 
 }
